@@ -192,3 +192,4 @@ obj-$(CONFIG_COUNTER)		+= counter/
 obj-$(CONFIG_MOST)		+= most/
 
 obj-m += latium/
+latium-y := safe_shutdown
