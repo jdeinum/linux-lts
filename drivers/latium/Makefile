@@ -1,4 +1,4 @@
-obj-m += safe_shutdown/ 
+obj-m += safe_shutdown/ button_shutdown/
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
