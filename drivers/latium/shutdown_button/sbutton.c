@@ -17,6 +17,8 @@
 #include <linux/interrupt.h> /* We want an interrupt */
 #include <linux/sched.h>
 #include <linux/reboot.h>
+#include <linux/kernel.h>
+
 
 #define INTERRUPT_PIN 49
 
