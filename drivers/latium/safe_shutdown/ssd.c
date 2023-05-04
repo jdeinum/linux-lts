@@ -17,15 +17,17 @@
 #include <linux/signal.h>
 #include <linux/interrupt.h>	/* We want an interrupt */
 #include <linux/sched.h>
-#include <linux/kernel.h>
 
 #define INTERRUPT_PIN 191
 
 // interrupt handler for the shutdown pin
 static irqreturn_t irq_handler(int irq, void *dev_id) {
 
+  // create the pid of the init process
+  struct pid *pid_struct = find_get_pid(1);
+
   pr_info("Interrupt received from shutdown pin, shutting down now!");
-  kernel_power_off();
+  kill_pid(pid_struct, SIGRTMIN + 4, 1);
   return IRQ_HANDLED;
 }
 
