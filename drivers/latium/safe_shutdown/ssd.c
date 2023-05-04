@@ -23,11 +23,8 @@
 // interrupt handler for the shutdown pin
 static irqreturn_t irq_handler(int irq, void *dev_id) {
 
-  // create the pid of the init process
-  struct pid *pid_struct = find_get_pid(1);
-
   pr_info("Interrupt received from shutdown pin, shutting down now!");
-  kill_pid(pid_struct, SIGRTMIN + 4, 1);
+  kernel_power_off();
   return IRQ_HANDLED;
 }
 
