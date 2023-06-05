@@ -12,6 +12,7 @@
 		ethernet0 = &fec;
 	};
 
+  // LED controller
 	led-controller {
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_gpio_leds>;
@@ -32,6 +33,7 @@
 		};
 	};
 
+  // Power regulator?
 	reg_3v3: regulator-3v3 {
 		compatible = "regulator-fixed";
 		regulator-name = "3V3";
@@ -40,6 +42,7 @@
 		regulator-always-on;
 	};
 
+  // Power regulator?
 	reg_1v8: regulator-1v8 {
 		compatible = "regulator-fixed";
 		regulator-name = "1V8";
@@ -48,6 +51,7 @@
 		regulator-always-on;
 	};
 
+  // USB power supply?
 	reg_usb_otg_vbus: regulator-usb-otg-vbus {
 		compatible = "regulator-fixed";
 		regulator-name = "USB_OTG_VBUS";
@@ -57,6 +61,7 @@
 		enable-active-high;
 	};
 
+  // modem power supply?
 	reg_wlan_vmmc: regulator-wlan-vmmc {
 		compatible = "regulator-fixed";
 		regulator-name = "WLAN_3V3";
@@ -68,35 +73,56 @@
 	};
 };
 
+// CAN bus 1
 &can1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan1>;
 	status = "okay";
 };
 
+// CAN bus 2
 &can2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan2>;
 	status = "okay";
 };
 
+// SPI controller 1
 &ecspi1 {
-	num-cs = <1>;
-	cs-gpios = <&gpio3 19 GPIO_ACTIVE_LOW>;
+	num-cs = <2>;
+	cs-gpios = <&gpio3 19 GPIO_ACTIVE_LOW>,<&gpio3 31 GPIO_ACTIVE_LOW>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_ecspi1>;
 	status = "okay";
 
+  // our SPI flash?
 	spiboot: flash@0 {
 		compatible = "jedec,spi-nor";
 		reg = <0>;
 		spi-max-frequency = <20000000>;
 	};
+
+  fram: mb85rs4mt@1 {
+    compatible = "jedec,spi-nor";
+    reg = <1>;
+    spi-max-frequency = <40000000>;
+    #address-cells = <1>;
+    #size-cells = <1>;
+    m25p,fast-read;
+    status = "okay";
+
+    partition@p1 {
+    label = "spi-fram";
+    reg = <0x0 0x20000>;
+    };
+  };
 };
 
+
+// SPI 2
 &ecspi2 {
-	num-cs = <1>;
-	cs-gpios = <&gpio6 2 GPIO_ACTIVE_LOW>;
+	num-cs = <2>;
+	cs-gpios = <&gpio6 2 GPIO_ACTIVE_LOW>, <&gpio4 5 GPIO_ACTIVE_LOW>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_ecspi2>;
 	status = "okay";
@@ -111,8 +137,15 @@
 		crystal = <1>;
 		poll-time = <100>;
 	};
-};
 
+  spidev@1 {
+      compatible = "linux,spidev";
+      reg = <1>;                   /* Chip select line 0 */
+      spi-max-frequency = <100000>; /* Maximum SPI frequency */
+  };
+};
+  
+// Ethernet controller
 &fec {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet>;
@@ -123,12 +156,15 @@
 	status = "okay";
 };
 
+
+// GPIO controller 1 Pin control names
 &gpio1 {
 	gpio-line-names = "AUD_MCLK", "", "", "", "", "REVA_DIO_1", "", "", "",
 		"REVA_DIO_3", "", "", "", "", "", "", "", "", "", "", "", "",
 		"", "", "", "", "", "", "", "", "", "";
 };
 
+// GPIO controller 2 pin control names
 &gpio2 {
 	gpio-line-names = "", "", "", "", "", "", "", "", "", "", "", "", "",
 		"", "", "DIO_2", "DIO_18", "DIO_12", "DIO_16", "EN_LCD_3.3V",
@@ -136,6 +172,7 @@
 		"BUS_ALE", "EN_SD_POWER#", "DIO_10", "", "";
 };
 
+// GPIO controller 2 pin control names
 &gpio3 {
 	gpio-line-names = "MUX_AD_00", "MUX_AD_01", "MUX_AD_02", "MUX_AD_03",
 		"MUX_AD_04", "MUX_AD_05", "MUX_AD_06", "MUX_AD_07", "MUX_AD_08",
@@ -144,6 +181,7 @@
 		"", "", "", "", "", "", "BUS_BHE#";
 };
 
+// GPIO controller 2 pin control names
 &gpio4 {
 	gpio-line-names = "", "", "", "", "", "DIO_7", "", "", "", "", "", "",
 		"", "", "", "", "LCD_CLK", "LCD_DE", "LCD_HSYNC", "LCD_VSYNC",
@@ -152,6 +190,7 @@
 		"LCD_D10";
 };
 
+// GPIO controller 2 pin control names
 &gpio5 {
 	gpio-line-names = "EIM_WAIT#", "", "", "", "DIO_20", "LCD_D11",
 		"LCD_D12", "LCD_D13", "LCD_D14", "LCD_D15", "LCD_D16",
@@ -161,18 +200,21 @@
 		"", "", "", "", "DIO_0", "DIO_6";
 };
 
+// GPIO controller 2 pin control names
 &gpio6 {
 	gpio-line-names = "", "", "", "CPU_DIO_A", "", "", "DIO_19", "", "",
 		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
 		"", "", "", "", "", "", "DIO_13";
 };
 
+// GPIO controller 2 pin control names
 &gpio7 {
 	gpio-line-names = "", "", "", "", "", "", "", "", "CPU_DIO_B", "", "",
 		"DIO_4", "DIO_5", "", "", "", "", "", "", "", "", "", "", "",
 		"", "", "", "", "", "", "", "";
 };
 
+// I2C controller 1
 &i2c1 {
 	clock-frequency = <100000>;
 	pinctrl-names = "default", "gpio";
@@ -182,6 +224,7 @@
 	sda-gpios = <&gpio3 28 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
 	status = "okay";
 
+  // Real Time Clock
 	isl12022: rtc@6f {
 		compatible = "isil,isl12022";
 		reg = <0x6f>;
@@ -190,6 +233,7 @@
 		vb85t = <2>; /* 2.55 V */
 	};
 
+  // SRAM 
 	isl12022_sram: eeprom@57 {
 		compatible = "atmel,24c01";
 		reg = <0x57>;
@@ -199,6 +243,7 @@
 		address-width = <8>;
 	};
 
+  // gpio controller 8
 	gpio8: gpio@28 {
 		compatible = "technologic,ts4900-gpio";
 		reg = <0x28>;
@@ -215,6 +260,7 @@
 	};
 };
 
+// second I2C bus
 &i2c2 {
 	clock-frequency = <100000>;
 	pinctrl-names = "default", "gpio";
@@ -225,10 +271,12 @@
 	status = "okay";
 };
 
+// IO multiplexer controller 1
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>;
 
+  // Pin control group 1 for SPI
 	pinctrl_ecspi1: ecspi1grp {
 		fsl,pins = <
 			MX6QDL_PAD_EIM_D17__ECSPI1_MISO			0x100b1
@@ -238,6 +286,8 @@
 		>;
 	};
 
+
+  // Pin control group 2 for SPI
 	pinctrl_ecspi2: ecspi2grp {
 		fsl,pins = <
 			MX6QDL_PAD_CSI0_DAT8__ECSPI2_SCLK		0x100b1
@@ -249,6 +299,7 @@
 		>;
 	};
 
+  // Pin control group 1 for ethernet
 	pinctrl_enet: enetgrp {
 		fsl,pins = <
 			MX6QDL_PAD_ENET_MDIO__ENET_MDIO			0x1b0b0
@@ -272,6 +323,7 @@
 		>;
 	};
 
+  // Pin control group 1 for CAN
 	pinctrl_flexcan1: flexcan1grp {
 		fsl,pins = <
 			MX6QDL_PAD_KEY_ROW2__FLEXCAN1_RX		0x1b0b1
@@ -279,6 +331,7 @@
 		>;
 	};
 
+  // Pin control group 2 for CAN
 	pinctrl_flexcan2: flexcan2grp {
 		fsl,pins = <
 			MX6QDL_PAD_KEY_COL4__FLEXCAN2_TX		0x1b0b1
@@ -286,6 +339,7 @@
 		>;
 	};
 
+  // Pin control group 1 for PCIE
 	pinctrl_pcie: pciegrp {
 		fsl,pins = <
 			MX6QDL_PAD_EIM_A17__GPIO2_IO21			0x1b088 /* OFF_BD_RESET#/PE_RST# */
@@ -323,6 +377,7 @@
 		>;
 	};
 
+  // Not too sure yet
 	pinctrl_muxbus_gpio: mbgpiogrp {
 		fsl,pins = <
 			MX6QDL_PAD_EIM_D31__GPIO3_IO31			0x1b0b1 /* DIO_10 */
@@ -351,6 +406,8 @@
 		>;
 	};
 
+  // Pin control group for SPI ? Not sure what the BB is for 
+  // Baseboard maybe?
 	pinctrl_bb_spi: bbspigrp {
 		fsl,pins = <
 			MX6QDL_PAD_EIM_DA11__GPIO3_IO11			0x1b088 /* IRQn (usually) */
@@ -361,6 +418,8 @@
 		>;
 	};
 
+
+  // Inter-IC Sound pin control group
 	pinctrl_i2s: i2sgrp {
 		fsl,pins = <
 			MX6QDL_PAD_CSI0_DAT7__AUD3_RXD			0x130b0
@@ -371,6 +430,19 @@
 		>;
 	};
 
+  // Inter-IC Sound pin control group
+	pinctrl_i2s: i2sgrp {
+		fsl,pins = <
+			MX6QDL_PAD_CSI0_DAT7__AUD3_RXD			0x130b0
+			MX6QDL_PAD_CSI0_DAT4__AUD3_TXC			0x130b0
+			MX6QDL_PAD_CSI0_DAT5__AUD3_TXD			0x110b0
+			MX6QDL_PAD_CSI0_DAT6__AUD3_TXFS			0x130b0
+			MX6QDL_PAD_GPIO_0__CCM_CLKO1			0x130b0 /* Audio CLK */
+		>;
+	};
+
+
+  // Inter-IC Sound pin control group
 	pinctrl_i2s_gpio: i2sgpiogrp {
 		fsl,pins = <
 			MX6QDL_PAD_GPIO_0__GPIO1_IO00			0x130b0 /* AUD_MCLK */
@@ -381,6 +453,7 @@
 		>;
 	};
 
+  // LCD pin control group
 	pinctrl_lcd: lcdgrp {
 		fsl,pins = <
 			MX6QDL_PAD_DI0_DISP_CLK__IPU1_DI0_DISP_CLK	0x38
@@ -414,6 +487,7 @@
 		>;
 	};
 
+  // LCD pin control group
 	pinctrl_lcd_gpio: lcdgpiogrp {
 		fsl,pins = <
 			MX6QDL_PAD_EIM_A19__GPIO2_IO19			0x1b0b1 /* EN_LCD_3.3V */
@@ -448,6 +522,8 @@
 		>;
 	};
 
+
+  // I2C Pin control group 1
 	pinctrl_i2c1: i2c1grp {
 		fsl,pins = <
 			MX6QDL_PAD_EIM_D21__I2C1_SCL			0x4001b8b1
@@ -455,6 +531,7 @@
 		>;
 	};
 
+  // GPIO pin control group for i2x?
 	pinctrl_i2c1_gpio: i2c1gpiogrp {
 		fsl,pins = <
 			MX6QDL_PAD_EIM_D21__GPIO3_IO21			0x4001b8b1
@@ -462,6 +539,7 @@
 		>;
 	};
 
+  // As above
 	pinctrl_i2c2: i2c2grp {
 		fsl,pins = <
 			MX6QDL_PAD_KEY_COL3__I2C2_SCL			0x4001b8b1
@@ -469,6 +547,7 @@
 		>;
 	};
 
+  // As above
 	pinctrl_i2c2_gpio: i2c2gpiogrp {
 		fsl,pins = <
 			MX6QDL_PAD_KEY_COL3__GPIO4_IO12			0x4001b8b1
@@ -476,6 +555,7 @@
 		>;
 	};
 
+  // Pin group for GPIOs to function as LEDs
 	pinctrl_gpio_leds: leds1grp {
 		fsl,pins = <
 			MX6QDL_PAD_GPIO_2__GPIO1_IO02			0x1b0b1 /* RED_LED# */
@@ -483,6 +563,7 @@
 		>;
 	};
 
+  // Pin control group for the UART 1
 	pinctrl_uart1: uart1grp {
 		fsl,pins = <
 			MX6QDL_PAD_SD3_DAT7__UART1_TX_DATA		0x1b0b1
@@ -490,6 +571,7 @@
 		>;
 	};
 
+  // Pin control group for the UART 2
 	pinctrl_uart2: uart2grp {
 		fsl,pins = <
 			MX6QDL_PAD_GPIO_7__UART2_TX_DATA		0x1b0b1
@@ -499,6 +581,7 @@
 		>;
 	};
 
+  // Pin control group for the UART 3
 	pinctrl_uart3: uart3grp {
 		fsl,pins = <
 			MX6QDL_PAD_EIM_D24__UART3_TX_DATA		0x1b0b1
@@ -506,6 +589,7 @@
 		>;
 	};
 
+  // Pin control group for the UART 4
 	pinctrl_uart4: uart4grp {
 		fsl,pins = <
 			MX6QDL_PAD_KEY_COL0__UART4_TX_DATA		0x1b0b1
@@ -513,6 +597,7 @@
 		>;
 	};
 
+  // Pin control group for the UART 5
 	pinctrl_uart5: uart5grp {
 		fsl,pins = <
 			MX6QDL_PAD_KEY_COL1__UART5_TX_DATA		0x1b0b1
@@ -520,12 +605,16 @@
 		>;
 	};
 
+  // USB on the go pin control group
+  // Allows USB peripherals to function as both the host, and the peripheral
 	pinctrl_usbotg: usbotggrp {
 		fsl,pins = <
 			MX6QDL_PAD_GPIO_1__USB_OTG_ID			0x17059
 		>;
 	};
 
+  // USDHC pin control group
+  // Most likely has to do with the SD card
 	pinctrl_usdhc1: usdhc1grp {
 		fsl,pins = <
 			MX6QDL_PAD_SD1_CMD__SD1_CMD			0x17059
@@ -539,6 +628,7 @@
 		>;
 	};
 
+  // As Aboce
 	pinctrl_usdhc1_100mhz: usdhc1grp-100mhz {
 		fsl,pins = <
 			MX6QDL_PAD_SD1_CMD__SD1_CMD			0x170B9
@@ -550,6 +640,7 @@
 		>;
 	};
 
+  // As above
 	pinctrl_usdhc1_200mhz: usdhc1grp-200mhz {
 		fsl,pins = <
 			MX6QDL_PAD_SD1_CMD__SD1_CMD			0x170F9
@@ -561,6 +652,7 @@
 		>;
 	};
 
+  // As above
 	pinctrl_usdhc2: usdhc2grp {
 		fsl,pins = <
 			MX6QDL_PAD_SD2_CMD__SD2_CMD			0x17059
@@ -573,6 +665,7 @@
 		>;
 	};
 
+  // As above
 	pinctrl_usdhc3: usdhc3grp {
 		fsl,pins = <
 			MX6QDL_PAD_SD3_CMD__SD3_CMD			0x17059
@@ -585,6 +678,8 @@
 	};
 };
 
+
+// Our PCIE controller
 &pcie {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pcie>;
@@ -592,16 +687,20 @@
 	status = "okay";
 };
 
+// Secure non volatile storage real time clock
+// Not sure where it would be on our board
 &snvs_rtc {
 	status = "disabled";
 };
 
+// The UART1 controller, the compatible string is likely defined elsewhere
 &uart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1>;
 	status = "okay";
 };
 
+// The UART2 controller, the compatible string is likely defined elsewhere
 &uart2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2>;
@@ -609,29 +708,35 @@
 	status = "okay";
 };
 
+// The UART3 controller, the compatible string is likely defined elsewhere
 &uart3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3>;
 	status = "okay";
 };
 
+// The UART4 controller, the compatible string is likely defined elsewhere
 &uart4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart4>;
 	status = "okay";
 };
 
+// The UART5 controller, the compatible string is likely defined elsewhere
 &uart5 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart5>;
 	status = "okay";
 };
 
+
+// USB host 1 controller
 &usbh1 {
 	disable-over-current;
 	status = "okay";
 };
 
+// USB on the go controller
 &usbotg {
 	vbus-supply = <&reg_usb_otg_vbus>;
 	pinctrl-names = "default";
@@ -640,6 +745,7 @@
 	status = "okay";
 };
 
+// usdh controller 1, manages our wifi unit
 &usdhc1 {
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc1>;
@@ -656,6 +762,7 @@
 	#size-cells = <0>;
 	status = "okay";
 
+  // WiFi controller
 	wlcore: wlcore@2 {
 		compatible = "ti,wl1271";
 		reg = <2>;
